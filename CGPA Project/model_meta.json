@@ -1,0 +1,23 @@
+{
+  "features": [
+    "midterm_norm",
+    "assign_norm",
+    "twelfth_pct",
+    "tenth_pct",
+    "study_hours",
+    "attendance",
+    "backlogs",
+    "stress",
+    "distance",
+    "complexity",
+    "teacher_fb",
+    "participation",
+    "prev_prev_gpa",
+    "academic_score",
+    "school_avg",
+    "backlogs_log",
+    "attend_stress",
+    "has_prev_gpa"
+  ],
+  "best_model": "Stacking Ensemble"
+}

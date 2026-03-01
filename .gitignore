@@ -205,3 +205,43 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# ── Node / React (frontend/) ──────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# ── ML Model (large binary — too big for GitHub free tier) ────────────────────
+# The .pkl file is ~20MB. Regenerate by running cgpa_prediction.ipynb.
+CGPA Project/best_cgpa_model.pkl
+
+# ── CatBoost training artifacts ───────────────────────────────────────────────
+catboost_info/
+CGPA Project/catboost_info/
+
+# ── Jupyter / notebook artifacts ──────────────────────────────────────────────
+.ipynb_checkpoints/
+CGPA Project/.ipynb_checkpoints/
+
+# ── Misc temp / test files ────────────────────────────────────────────────────
+test_api.py
+test_fi.py
+debug_fi.py
+insert_cell.py
+start_api.sh
+*.txt
+!README.md
+
+# ── OS files ──────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── VS Code (keep settings, ignore extensions list) ──────────────────────────
+.vscode/extensions.json
