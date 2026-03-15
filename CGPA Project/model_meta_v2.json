@@ -1,0 +1,39 @@
+{
+  "model": "StackingRegressor",
+  "features": [
+    "midterm_norm",
+    "assign_norm",
+    "twelfth_pct",
+    "tenth_pct",
+    "study_hours",
+    "attendance",
+    "backlogs",
+    "stress",
+    "distance",
+    "complexity",
+    "teacher_fb",
+    "participation",
+    "prev_prev_gpa",
+    "academic_score",
+    "school_avg",
+    "attend_stress",
+    "backlogs_log",
+    "has_prev_gpa",
+    "intro_grade",
+    "hw_grade"
+  ],
+  "n_features": 20,
+  "n_samples": 961,
+  "n_imputed_targets": 380,
+  "cv_folds": 10,
+  "cv_r2": 0.7088,
+  "cv_rmse": 0.5031,
+  "holdout_r2": 0.7632,
+  "holdout_rmse": 0.5143,
+  "holdout_a05": 78.8,
+  "holdout_a10": 94.3,
+  "new_features": [
+    "intro_grade",
+    "hw_grade"
+  ]
+}

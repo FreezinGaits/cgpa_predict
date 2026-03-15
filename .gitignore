@@ -245,3 +245,9 @@ desktop.ini
 
 # ── VS Code (keep settings, ignore extensions list) ──────────────────────────
 .vscode/extensions.json
+
+# Ignore new media data and v2 model
+CGPA Project/data/intros/
+CGPA Project/data/notes/
+CGPA Project/best_cgpa_model_v2.pkl
+
