@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Any
 
 
 class StudentInput(BaseModel):
@@ -68,3 +68,8 @@ class FeatureImportanceItem(BaseModel):
 
 class FeatureImportanceResponse(BaseModel):
     features: list[FeatureImportanceItem]
+
+
+class GradeResponse(BaseModel):
+    grade: int
+    details: Optional[dict[str, Any]] = None

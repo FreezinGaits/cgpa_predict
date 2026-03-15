@@ -15,8 +15,6 @@ const FIELDS = [
   { key: 'teacher_feedback',label: "Teacher's Feedback",      type: 'select', options: [['1','Poor / Needs Work'],['2','Average'],['3','Good']] },
   { key: 'participation',   label: 'Discussion Participation', type: 'select', options: [['1','Less Active'],['2','Good Listener'],['3','Shares Stats'],['4','Moderator']] },
   { key: 'prev_prev_gpa',   label: 'Historical GPA (optional)',type: 'number', min: 0, max: 10, step: 0.01, hint: '⭐ Enter GPA from semester before last. Leave 0 if first semester or unknown.' },
-  { key: 'intro_grade',     label: 'Introduction Grade',      type: 'range',  min: 1,  max: 10,  step: 1,   unit: '/10',   hint: '🎙️ Quality of verbal introduction (from Whisper AI transcription analysis)' },
-  { key: 'hw_grade',        label: 'Handwriting Grade',       type: 'range',  min: 1,  max: 10,  step: 1,   unit: '/10',   hint: '✍️ Quality of handwritten notes (from Computer Vision image analysis)' },
 ]
 
 const DEFAULTS = {
@@ -28,8 +26,54 @@ const DEFAULTS = {
 
 export default function PredictionForm({ onResult, onError, isLoading, setLoading }) {
   const [values, setValues] = useState(DEFAULTS)
+  const [introUploading, setIntroUploading] = useState(false)
+  const [hwUploading, setHwUploading] = useState(false)
+  const [introDetails, setIntroDetails] = useState(null)
+  const [hwDetails, setHwDetails] = useState(null)
 
   const handleChange = (key, val) => setValues(v => ({ ...v, [key]: val }))
+
+  const handleIntroUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setIntroUploading(true)
+    setIntroDetails(null)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await axios.post('/api/grade-intro', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      handleChange('intro_grade', res.data.grade)
+      setIntroDetails(res.data.details)
+    } catch (err) {
+      const msg = err.response?.data?.detail || 'Audio grading failed'
+      onError(msg)
+    } finally {
+      setIntroUploading(false)
+    }
+  }
+
+  const handleHwUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setHwUploading(true)
+    setHwDetails(null)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await axios.post('/api/grade-handwriting', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      handleChange('hw_grade', res.data.grade)
+      setHwDetails(res.data.details)
+    } catch (err) {
+      const msg = err.response?.data?.detail || 'Image grading failed'
+      onError(msg)
+    } finally {
+      setHwUploading(false)
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -120,6 +164,93 @@ export default function PredictionForm({ onResult, onError, isLoading, setLoadin
               </div>
             )
           })}
+
+          {/* ── AI Grading Section ── */}
+          <div className="ai-section">
+            <div className="ai-section-title">🤖 AI-Powered Grading</div>
+            <p className="ai-section-desc">Upload files for automatic grading, or adjust the sliders manually.</p>
+
+            {/* Introduction Grade */}
+            <div className="ai-grade-row">
+              <div className="ai-grade-left">
+                <label className="form-label">
+                  🎙️ Introduction Grade
+                  <span className="form-label-val">{values.intro_grade}/10</span>
+                </label>
+                <input
+                  type="range"
+                  min={1} max={10} step={1}
+                  value={values.intro_grade}
+                  style={{ '--range-pct': rangePct(values.intro_grade, 1, 10) }}
+                  onChange={e => { handleChange('intro_grade', parseFloat(e.target.value)); setIntroDetails(null) }}
+                />
+              </div>
+              <div className="ai-grade-right">
+                <label className="upload-btn" style={introUploading ? { opacity: 0.5, pointerEvents: 'none' } : {}}>
+                  {introUploading ? (
+                    <><div className="spinner" style={{ width: 14, height: 14 }} /> Analyzing…</>
+                  ) : (
+                    <>📤 Upload Audio</>
+                  )}
+                  <input
+                    type="file"
+                    accept=".mp3,.wav,.m4a,.webm,.ogg"
+                    style={{ display: 'none' }}
+                    onChange={handleIntroUpload}
+                  />
+                </label>
+              </div>
+            </div>
+            {introDetails && (
+              <div className="ai-result-box">
+                <div className="ai-result-label">✅ Whisper AI Transcript:</div>
+                <div className="ai-result-text">"{introDetails.transcript}"</div>
+                <div className="ai-result-meta">
+                  Words: {introDetails.word_count} · Sentences: {introDetails.sentence_count} · Vocab Richness: {introDetails.vocab_richness}
+                </div>
+              </div>
+            )}
+
+            {/* Handwriting Grade */}
+            <div className="ai-grade-row">
+              <div className="ai-grade-left">
+                <label className="form-label">
+                  ✍️ Handwriting Grade
+                  <span className="form-label-val">{values.hw_grade}/10</span>
+                </label>
+                <input
+                  type="range"
+                  min={1} max={10} step={1}
+                  value={values.hw_grade}
+                  style={{ '--range-pct': rangePct(values.hw_grade, 1, 10) }}
+                  onChange={e => { handleChange('hw_grade', parseFloat(e.target.value)); setHwDetails(null) }}
+                />
+              </div>
+              <div className="ai-grade-right">
+                <label className="upload-btn" style={hwUploading ? { opacity: 0.5, pointerEvents: 'none' } : {}}>
+                  {hwUploading ? (
+                    <><div className="spinner" style={{ width: 14, height: 14 }} /> Analyzing…</>
+                  ) : (
+                    <>📤 Upload Image</>
+                  )}
+                  <input
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.bmp,.webp"
+                    style={{ display: 'none' }}
+                    onChange={handleHwUpload}
+                  />
+                </label>
+              </div>
+            </div>
+            {hwDetails && (
+              <div className="ai-result-box">
+                <div className="ai-result-label">✅ Vision Analysis:</div>
+                <div className="ai-result-meta">
+                  Content Density: {(hwDetails.content_density * 100).toFixed(1)}% · Contrast: {hwDetails.contrast} · Edge Density: {(hwDetails.edge_density * 100).toFixed(1)}% · Line Coverage: {(hwDetails.line_regularity * 100).toFixed(0)}%
+                </div>
+              </div>
+            )}
+          </div>
 
           <button type="submit" className="submit-btn" disabled={isLoading}>
             {isLoading ? (
