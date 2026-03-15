@@ -16,6 +16,8 @@ class StudentInput(BaseModel):
     teacher_feedback: int = Field(..., ge=1, le=3, description="Teacher feedback: 1=Poor, 2=Average, 3=Good")
     participation: int = Field(..., ge=1, le=4, description="Discussion participation: 1=Less Active, 2=Good Listener, 3=Shares Stats, 4=Moderator")
     prev_prev_gpa: Optional[float] = Field(None, ge=0, le=10, description="CGPA of the semester before last (optional)")
+    intro_grade: int = Field(5, ge=1, le=10, description="Introduction quality grade (1–10) from audio analysis")
+    hw_grade: int = Field(5, ge=1, le=10, description="Handwriting quality grade (1–10) from image analysis")
 
     class Config:
         json_schema_extra = {
@@ -32,7 +34,9 @@ class StudentInput(BaseModel):
                 "complexity": 2,
                 "teacher_feedback": 3,
                 "participation": 2,
-                "prev_prev_gpa": None
+                "prev_prev_gpa": None,
+                "intro_grade": 6,
+                "hw_grade": 7
             }
         }
 

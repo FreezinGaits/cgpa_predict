@@ -1,6 +1,6 @@
 """
 predictor.py — Model loading, feature engineering, and prediction logic.
-Mirrors the exact feature engineering done in cgpa_prediction.ipynb.
+Mirrors the exact feature engineering done in cgpa_prediction_v2.py.
 """
 import json
 import math
@@ -11,11 +11,11 @@ import joblib
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 BASE_DIR   = pathlib.Path(__file__).parent.parent
-MODEL_PATH = BASE_DIR / "CGPA Project" / "best_cgpa_model.pkl"
-META_PATH  = BASE_DIR / "CGPA Project" / "model_meta.json"
+MODEL_PATH = BASE_DIR / "CGPA Project" / "best_cgpa_model_v2.pkl"
+META_PATH  = BASE_DIR / "CGPA Project" / "model_meta_v2.json"
 
-# RMSE from 10-fold CV — used for confidence interval
-CV_RMSE = 0.678
+# RMSE from holdout evaluation — used for confidence interval
+CV_RMSE = 0.5143
 
 # ── Feature display names ─────────────────────────────────────────────────────
 DISPLAY_NAMES = {
@@ -37,6 +37,8 @@ DISPLAY_NAMES = {
     "backlogs_log":    "Backlog Impact (log)",
     "attend_stress":   "Attendance × Low Stress",
     "has_prev_gpa":    "Has Historical GPA",
+    "intro_grade":     "Introduction Grade",
+    "hw_grade":        "Handwriting Grade",
 }
 
 # ── Grade bands ───────────────────────────────────────────────────────────────
@@ -74,7 +76,7 @@ class CGPAPredictor:
         with open(META_PATH) as f:
             self.meta = json.load(f)
         self.features = self.meta["features"]
-        self.model_name = self.meta["best_model"]
+        self.model_name = self.meta.get("model", "StackingRegressor")
         self._feature_importance = self._compute_feature_importance()
 
     @classmethod
@@ -83,7 +85,7 @@ class CGPAPredictor:
             cls._instance = CGPAPredictor()
         return cls._instance
 
-    # ── Feature engineering — mirrors notebook Cell 6 exactly ────────────────
+    # ── Feature engineering — mirrors cgpa_prediction_v2.py exactly ──────────
     def _engineer(self, raw: dict) -> dict:
         midterm   = float(raw["midterm"])
         assign    = float(raw["assignment"])
@@ -114,6 +116,9 @@ class CGPAPredictor:
             "backlogs_log":    math.log1p(backlogs),
             "attend_stress":   attend * (10 - stress),
             "has_prev_gpa":    1.0 if ppgpa is not None else 0.0,
+            # New v2 features — from audio/image grading
+            "intro_grade":     float(raw.get("intro_grade", 5)),
+            "hw_grade":        float(raw.get("hw_grade", 5)),
         }
         return feats
 
@@ -153,6 +158,14 @@ class CGPAPredictor:
             tips.append(f"Strong academic performance (midterm + assignment avg: {feats['academic_score']:.1f}/100) is the greatest positive signal.")
         if feats["study_hours"] < 2:
             tips.append(f"Low study hours ({feats['study_hours']:.1f} hrs/day) — increasing to 3+ hrs typically correlates with better GPA.")
+        if feats["intro_grade"] >= 8:
+            tips.append(f"Strong introduction grade ({int(feats['intro_grade'])}/10) — good communication skills correlate with higher CGPA.")
+        elif feats["intro_grade"] <= 3:
+            tips.append(f"Low introduction grade ({int(feats['intro_grade'])}/10) — improving communication and vocabulary can help.")
+        if feats["hw_grade"] >= 8:
+            tips.append(f"Excellent handwriting grade ({int(feats['hw_grade'])}/10) — organized note-taking is a positive signal.")
+        elif feats["hw_grade"] <= 3:
+            tips.append(f"Low handwriting grade ({int(feats['hw_grade'])}/10) — neater and more thorough notes may improve performance.")
         if feats["prev_prev_gpa"] is not np.nan and not math.isnan(feats.get("prev_prev_gpa", float("nan"))):
             ppgpa = feats["prev_prev_gpa"]
             diff = cgpa - ppgpa
@@ -164,7 +177,7 @@ class CGPAPredictor:
             tips.append(f"Long commute ({feats['distance']:.0f} km) may affect attendance and study time.")
         if not tips:
             tips.append("Overall profile is balanced. Maintain consistency in attendance and academic work.")
-        return tips[:4]
+        return tips[:5]
 
     def _compute_feature_importance(self) -> list[dict]:
         try:

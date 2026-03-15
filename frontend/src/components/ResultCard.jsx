@@ -11,7 +11,7 @@ const GRADE_COLORS = {
   'At Risk':     { bg: 'rgba(239,68,68,0.15)',   border: 'rgba(239,68,68,0.4)',   text: '#ef4444' },
 }
 
-const INSIGHT_ICONS = ['⚠️','📉','😓','🎯','📚','✅','📍','📈']
+const INSIGHT_ICONS = ['⚠️','📉','😓','🎯','📚','🎙️','✍️','✅','📍','📈']
 
 export default function ResultCard({ result }) {
   const [animCGPA, setAnimCGPA] = useState(0)
@@ -95,7 +95,7 @@ export default function ResultCard({ result }) {
         </p>
 
         <p style={{ marginTop:'0.5rem', fontSize:'0.7rem', color:'var(--text3)' }}>
-          Model: {result.model_name} · ±1.0 accuracy: 85.5% on test data
+          Model: {result.model_name} · ±0.5 accuracy: 78.8% · ±1.0 accuracy: 94.3% · R²: 0.763
         </p>
       </div>
 

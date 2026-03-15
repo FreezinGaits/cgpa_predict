@@ -14,14 +14,16 @@ const FIELDS = [
   { key: 'complexity',      label: 'Content Complexity',      type: 'select', options: [['1','Easy'],['2','Medium'],['3','Hard']] },
   { key: 'teacher_feedback',label: "Teacher's Feedback",      type: 'select', options: [['1','Poor / Needs Work'],['2','Average'],['3','Good']] },
   { key: 'participation',   label: 'Discussion Participation', type: 'select', options: [['1','Less Active'],['2','Good Listener'],['3','Shares Stats'],['4','Moderator']] },
-  { key: 'prev_prev_gpa',   label: 'Historical GPA (optional)',type: 'number', min: 0, max: 10, step: 0.01, hint: '⭐ Strongest predictor (21% weight). Enter GPA from semester before last. Leave 0 if first semester or result unknown — model will assume average.' },
+  { key: 'prev_prev_gpa',   label: 'Historical GPA (optional)',type: 'number', min: 0, max: 10, step: 0.01, hint: '⭐ Enter GPA from semester before last. Leave 0 if first semester or unknown.' },
+  { key: 'intro_grade',     label: 'Introduction Grade',      type: 'range',  min: 1,  max: 10,  step: 1,   unit: '/10',   hint: '🎙️ Quality of verbal introduction (from Whisper AI transcription analysis)' },
+  { key: 'hw_grade',        label: 'Handwriting Grade',       type: 'range',  min: 1,  max: 10,  step: 1,   unit: '/10',   hint: '✍️ Quality of handwritten notes (from Computer Vision image analysis)' },
 ]
 
 const DEFAULTS = {
   midterm: 40, assignment: 17, attendance: 80, study_hours: 3,
   twelfth_pct: 80, tenth_pct: 80, backlogs: 0, stress: 3,
   distance: 15, complexity: '2', teacher_feedback: '2', participation: '2',
-  prev_prev_gpa: 0,
+  prev_prev_gpa: 0, intro_grade: 5, hw_grade: 5,
 }
 
 export default function PredictionForm({ onResult, onError, isLoading, setLoading }) {
@@ -49,6 +51,8 @@ export default function PredictionForm({ onResult, onError, isLoading, setLoadin
         teacher_feedback:parseInt(values.teacher_feedback, 10),
         participation:   parseInt(values.participation, 10),
         prev_prev_gpa:   parseFloat(values.prev_prev_gpa) > 0 ? parseFloat(values.prev_prev_gpa) : null,
+        intro_grade:     parseInt(values.intro_grade, 10),
+        hw_grade:        parseInt(values.hw_grade, 10),
       }
       const res = await axios.post('/api/predict', payload)
       onResult(res.data)

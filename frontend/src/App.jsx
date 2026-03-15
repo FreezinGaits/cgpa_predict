@@ -26,7 +26,7 @@ export default function App() {
             <div className="logo-icon">🎓</div>
             <div>
               <div className="logo-text">CGPA Predictor</div>
-              <div className="logo-sub">ML · FastAPI · Real College Data</div>
+              <div className="logo-sub">ML · Whisper · OpenCV · FastAPI</div>
             </div>
           </div>
           <div className="header-badge">
@@ -38,17 +38,19 @@ export default function App() {
 
       {/* ── Hero ── */}
       <div className="hero">
-        <div className="hero-tag">🏫 Real Student Data · Ensemble ML · Stacking Model</div>
-        <h1>Predict Your Semester CGPA<br />with Machine Learning</h1>
+        <div className="hero-tag">🏫 Multi-Modal ML · Audio + Vision + Survey · Stacking Ensemble</div>
+        <h1>Predict Your Semester CGPA<br />with Multi-Modal Machine Learning</h1>
         <p>
-          Built on real survey data from college students. Fill in your academic profile
-          to get an instant GPA prediction powered by a tuned Stacking Ensemble model.
+          Built on real data from 961 college students — combining survey responses,
+          audio introductions (Whisper AI), and handwriting analysis (Computer Vision)
+          to predict GPA with a tuned Stacking Ensemble model.
         </p>
         <div className="hero-stats">
-          <div className="hero-stat"><div className="hero-stat-val">583</div><div className="hero-stat-label">Real Student Samples</div></div>
-          <div className="hero-stat"><div className="hero-stat-val">67.5%</div><div className="hero-stat-label">±0.5 Accuracy</div></div>
-          <div className="hero-stat"><div className="hero-stat-val">85.5%</div><div className="hero-stat-label">±1.0 Accuracy</div></div>
-          <div className="hero-stat"><div className="hero-stat-val">0.61</div><div className="hero-stat-label">R² Score</div></div>
+          <div className="hero-stat"><div className="hero-stat-val">961</div><div className="hero-stat-label">Real Student Samples</div></div>
+          <div className="hero-stat"><div className="hero-stat-val">78.8%</div><div className="hero-stat-label">±0.5 Accuracy</div></div>
+          <div className="hero-stat"><div className="hero-stat-val">94.3%</div><div className="hero-stat-label">±1.0 Accuracy</div></div>
+          <div className="hero-stat"><div className="hero-stat-val">0.763</div><div className="hero-stat-label">R² Score</div></div>
+          <div className="hero-stat"><div className="hero-stat-val">20</div><div className="hero-stat-label">Features Used</div></div>
           <div className="hero-stat"><div className="hero-stat-val">11</div><div className="hero-stat-label">Models Compared</div></div>
         </div>
       </div>
@@ -93,8 +95,8 @@ export default function App() {
 
       {/* ── Footer ── */}
       <footer style={{ textAlign:'center', padding:'2rem', color:'var(--text3)', fontSize:'0.78rem', borderTop:'1px solid var(--border)', marginTop:'2rem' }}>
-        Built with FastAPI · scikit-learn · Stacking Ensemble · React + Recharts &nbsp;|&nbsp;
-        Real data from college student survey &nbsp;|&nbsp; For academic demonstration
+        Built with FastAPI · scikit-learn · Whisper AI · OpenCV · Stacking Ensemble · React + Recharts &nbsp;|&nbsp;
+        Multi-modal data from 961 college students &nbsp;|&nbsp; For academic demonstration
       </footer>
     </div>
   )
