@@ -48,6 +48,35 @@ To feed audio and visual data into a regression model, it had to be quantified. 
     *   **Line Regularity:** Breaking the page into horizontal strips to ensure the writing was evenly distributed, not just scribbled in a corner.
 *   **Result:** A normalized score from 1 to 10 representing structural neatness.
 
+### C. The Full 20-Feature Array
+After combining the standard quantitative data, the engineered features, and the multi-modal AI features, the final dataset consisted of exactly 20 features fed into the Machine Learning model:
+
+**Standard Survey Features (10):**
+1. `midterm_norm` (Midterm Score)
+2. `assign_norm` (Assignment Score)
+3. `twelfth_pct` (12th Grade Percentage)
+4. `tenth_pct` (10th Grade Percentage)
+5. `study_hours` (Study Hours/Day)
+6. `attendance` (Attendance Percentage)
+7. `backlogs` (Number of Backlogs)
+8. `stress` (Mental Stress Level 0-10)
+9. `distance` (Distance from Campus in km)
+10. `complexity` (Content Complexity 1-3)
+11. `teacher_fb` (Teacher Feedback 1-3)
+12. `participation` (Discussion Participation 1-4)
+13. `prev_prev_gpa` (Historical GPA)
+
+**Engineered Interaction Features (5):**
+14. `academic_score` (Average of Midterm and Assignment)
+15. `school_avg` (Average of 10th and 12th relative performance)
+16. `backlogs_log` (Log-transformed penalty for having multiple backlogs)
+17. `attend_stress` (Interaction term tracking high attendance vs low stress)
+18. `has_prev_gpa` (Boolean flag indicating if historical GPA data is present)
+
+**Multi-Modal AI Features (2):**
+19. `intro_grade` (Audio analysis of communication skills)
+20. `hw_grade` (Computer Vision analysis of organizational skills)
+
 ---
 
 ## 4. Machine Learning Architecture & Algorithms
