@@ -117,3 +117,42 @@ After mathematically preprocessing, normalizing, filtering out text responses, a
 This highlights the classic difference between Bivariate Statistics and Multivariate Machine Learning (also known as Multicollinearity).
 *   **Pearson Correlation (Independent/Bivariate):** Looks at each feature completely alone. It proves that 10th grade, 12th grade, and midterms all have strong linear relationships with CGPA when looked at independently.
 *   **Gradient Boosting (Multivariate):** Looks at all features working together simultaneously. Because a student with a high `prev_prev_gpa` likely also has high 12th % and 10th %, there is heavy "Information Overlap". The model prioritizes `prev_prev_gpa` to do the heavy lifting because it summarizes their academic profile best. Once it uses that, the other academic features become computationally redundant, so their importance score drops drastically. The remaining features act as slight fine-tuning mechanisms.
+
+---
+
+### Q12: Why did you use a Stacking Regressor instead of a Neural Network or simple Linear Regression?
+**Answer:**
+*   **Why not Linear Regression?** Linear models perform poorly on tabular data that contains complex, non-linear relationships (e.g., the relationship between `attendance` and `stress` isn't a straight line).
+*   **Why not Neural Networks?** Neural networks require massive datasets (tens of thousands of rows) to accurately tune their weights without overfitting. For a dataset of ~1,000 rows, decision-tree ensembles are mathematically proven to be vastly superior.
+*   **Why Stacking?** Stacking combines the "Wisdom of the Crowd." By training multiple distinct algorithms (Random Forest, XGBoost, CatBoost, etc.) as "Level 0" base estimators, and capping them with a "Level 1" Ridge Regressor, the meta-model learns which specific algorithm to trust in different situations, maximizing accuracy.
+
+---
+
+### Q13: How did you handle outliers in the dataset?
+**Answer:**
+Outliers were primarily handled during the data preprocessing phase using a custom extraction heuristic. Since a large portion of the raw dataset consisted of inconsistent free-text inputs (e.g., typing "85 percent", "85%", or "0.85"), the Python script standardizes everything mathematically.
+*   Values greater than 100 or less than 0 were explicitly converted to `NaN` to be smoothly imputed later.
+*   Decimal inputs (like 0.8) were mathematically scaled up assuming they were ratios.
+*   The tree-based models used in the Stacking Ensemble (like XGBoost and Random Forest) are inherently robust to outliers, as they segment data by nodes rather than trying to draw a line of best fit through skewed data points.
+
+---
+
+### Q14: What is the role of `StandardScaler` in your pipeline?
+**Answer:**
+In `cgpa_prediction_v2.py`, within the Scikit-Learn `Pipeline`, we use `StandardScaler()`. 
+*   **Why it is needed:** Different columns measure completely different things. Midterm scores scale from 0 to 100, while `stress` is 0 to 10, and `backlogs` is 0 to ~5. If we don't scale the data, distance-based algorithms like Ridge Regression or KNN might falsely believe that Midterm Score is mathematically "more important" than Stress simply because the number 100 is larger than the number 10.
+*   **What it does:** `StandardScaler` converts every column to have a mean of 0 and a standard deviation of 1. This puts every feature on an equal playing field so the model judges them strictly on correlation, not raw scale.
+
+---
+
+### Q15: What would be the "Future Scope" of this project? How could it be improved?
+**Answer:**
+1.  **Larger Dataset:** Expanding the dataset from 1,000 students to 10,000+ students across different universities to ensure the model isn't overfitting to one specific college's grading culture.
+2.  **Video Analysis:** Currently, we only analyze still photos of handwriting and the audio track of video intros. In the future, we could use facial expression recognition during the introduction video to measure confidence or anxiety levels as another predictive quantitative feature.
+3.  **Real-Time API Integration:** Instead of manual CSV uploads, integrating directly with the university's LMS (Learning Management System like Canvas or Blackboard) to pull midterm and assignment metrics automatically on a daily basis to provide students with a "Live Risk Dashboard".
+
+---
+
+### Q16: How fast does the backend predict a CGPA when a user clicks the button?
+**Answer:**
+The actual inference time (the moment the pre-trained `best_cgpa_model_v2.pkl` predicts the float value) takes roughly **10 to 20 milliseconds**. However, if the user uploads an audio snippet or an image, the total API response time will jump to roughly **1 to 3 seconds**. This is because running the file strictly through the Whisper transcription AI and the OpenCV analysis array takes edge-compute processing power before it can feed the numeric grade into the ML model.
