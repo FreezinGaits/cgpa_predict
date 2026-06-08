@@ -68,17 +68,7 @@ async def startup():
 
 # ── Routes ────────────────────────────────────────────────────────────────────
 
-@app.get("/", tags=["Info"])
-async def root():
-    return {
-        "name": "CGPA Prediction API",
-        "version": "2.0.0",
-        "docs": "/docs",
-        "health": "/health",
-        "predict": "/predict",
-        "grade_intro": "/grade-intro",
-        "grade_handwriting": "/grade-handwriting",
-    }
+
 
 
 # ── Auth Routes ─────────────────────────────────────────────────────────
