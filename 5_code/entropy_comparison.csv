@@ -1,0 +1,22 @@
+Feature,Type,Entropy_Before,Entropy_After,Change,Verdict
+midterm_norm,Norm. Shannon,,0.7583,0.0,NEW
+assign_norm,Norm. Shannon,,0.2514,0.0,NEW
+twelfth_pct,Norm. Shannon,0.7388,0.7357,-0.0031,[OK] STABLE
+tenth_pct,Norm. Shannon,0.7467,0.7398,-0.0069,[OK] STABLE
+study_hours,Norm. Shannon,0.5061,0.4979,-0.0082,[OK] STABLE
+attendance,Norm. Shannon,0.6273,0.617,-0.0104,[OK] STABLE
+backlogs,Norm. Shannon,0.4705,0.452,-0.0185,[OK] STABLE
+stress,Norm. Shannon,0.9983,0.9983,0.0,[OK] STABLE
+distance,Norm. Shannon,0.0271,0.0266,-0.0005,[OK] STABLE
+complexity,Norm. Shannon,0.6476,0.6476,0.0,[OK] STABLE
+teacher_fb,Norm. Shannon,0.606,0.606,0.0,[OK] STABLE
+participation,Norm. Shannon,0.9203,0.9203,0.0,[OK] STABLE
+prev_prev_gpa,Norm. Shannon,0.7034,0.5277,-0.1757,[OK] REDUCED
+academic_score,Norm. Shannon,,0.5757,0.0,NEW
+school_avg,Norm. Shannon,,0.6977,0.0,NEW
+attend_stress,Norm. Shannon,,0.6428,0.0,NEW
+backlogs_log,Norm. Shannon,,0.452,0.0,NEW
+has_prev_gpa,Norm. Shannon,,0.0,0.0,NEW
+intro_grade,Norm. Shannon,,0.9025,0.0,NEW
+hw_grade,Norm. Shannon,,0.7917,0.0,NEW
+CGPA,Norm. Shannon,0.6959,0.6164,-0.0795,[OK] REDUCED

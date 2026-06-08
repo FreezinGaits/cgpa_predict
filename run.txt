@@ -1,0 +1,8 @@
+firstly go in the venv: 
+
+cd frontend
+npm run dev
+
+uvicorn api.main:app --reload --port 8000
+
+python -c "import sqlite3; c=sqlite3.connect('cgpa_app.db'); [print(r) for r in c.execute('SELECT id,name,email,role,created_at FROM users').fetchall()]"

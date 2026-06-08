@@ -1,0 +1,8 @@
+# Generate graphs + CSV
+.venv\Scripts\python.exe generate_visualizations.py
+
+# Start API
+.venv\Scripts\python.exe -m uvicorn api.main:app --port 8000
+
+# Start Frontend
+cd frontend && npm run dev

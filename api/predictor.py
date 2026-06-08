@@ -11,8 +11,8 @@ import joblib
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 BASE_DIR   = pathlib.Path(__file__).parent.parent
-MODEL_PATH = BASE_DIR / "CGPA Project" / "best_cgpa_model_v2.pkl"
-META_PATH  = BASE_DIR / "CGPA Project" / "model_meta_v2.json"
+MODEL_PATH = BASE_DIR / "5_code" / "best_cgpa_model_v2.pkl"
+META_PATH  = BASE_DIR / "5_code" / "model_meta_v2.json"
 
 # RMSE from holdout evaluation — used for confidence interval
 CV_RMSE = 0.5143
@@ -36,7 +36,7 @@ DISPLAY_NAMES = {
     "school_avg":      "School Average",
     "backlogs_log":    "Backlog Impact (log)",
     "attend_stress":   "Attendance × Low Stress",
-    "has_prev_gpa":    "Has Historical GPA",
+    # has_prev_gpa intentionally hidden — near-zero importance, still computed internally
     "intro_grade":     "Introduction Grade",
     "hw_grade":        "Handwriting Grade",
 }
@@ -93,7 +93,10 @@ class CGPAPredictor:
         tenth     = float(raw["tenth_pct"])
         attend    = float(raw["attendance"])
         backlogs  = float(raw["backlogs"])
-        stress    = float(raw["stress"])
+        stress_raw= float(raw["stress"])  # Frontend sends 0-10
+        # Training pipeline uses binary stress: 0 or 1
+        # Map: 0-4 => 0 (low stress), 5-10 => 1 (high stress)
+        stress    = 1.0 if stress_raw >= 5 else 0.0
         ppgpa     = raw.get("prev_prev_gpa")
 
         feats = {
@@ -110,11 +113,11 @@ class CGPAPredictor:
             "teacher_fb":      float(raw["teacher_feedback"]),
             "participation":   float(raw["participation"]),
             "prev_prev_gpa":   float(ppgpa) if ppgpa is not None else np.nan,
-            # Engineered
+            # Engineered — MUST match cgpa_prediction_v2.py exactly
             "academic_score":  (min(midterm, 100) + min(assign, 100)) / 2,
             "school_avg":      (twelfth + tenth) / 2,
             "backlogs_log":    math.log1p(backlogs),
-            "attend_stress":   attend * (10 - stress),
+            "attend_stress":   attend * (1 - stress * 0.1),  # Fixed: matches training pipeline
             "has_prev_gpa":    1.0 if ppgpa is not None else 0.0,
             # New v2 features — from audio/image grading
             "intro_grade":     float(raw.get("intro_grade", 5)),
@@ -232,4 +235,6 @@ class CGPAPredictor:
 
     @property
     def feature_importance(self) -> list[dict]:
-        return sorted(self._feature_importance, key=lambda x: x["importance"], reverse=True)
+        # Filter out has_prev_gpa (hidden from UI, still used internally)
+        visible = [fi for fi in self._feature_importance if fi["feature"] != "has_prev_gpa"]
+        return sorted(visible, key=lambda x: x["importance"], reverse=True)

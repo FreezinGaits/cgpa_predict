@@ -303,8 +303,7 @@ def main():
     print(f"\nTotal features: {len(FEATURES)} (18 original + 2 new)")
 
     # ═══════════════════════════════════════════════════════════════════════════════
-    # SECTION 5: KEY CHANGE #2 — 10-Fold CV for Model Selection
-    # Professor's feedback: "Use 10-fold CV and average metrics to find best model"
+    # SECTION 5: — 10-Fold CV for Model Selection
     # ═══════════════════════════════════════════════════════════════════════════════
     print("\n" + "=" * 70)
     print("10-FOLD CROSS-VALIDATION MODEL SELECTION")
@@ -330,8 +329,8 @@ def main():
         ("ElasticNet",       ElasticNet(alpha=0.01, max_iter=5000)),
         ("KNN",              KNeighborsRegressor(n_neighbors=5)),
         ("SVR-RBF",          SVR(kernel="rbf", C=10, gamma="scale")),
-        ("RandomForest",     RandomForestRegressor(n_estimators=200, random_state=42, n_jobs=-1)),
-        ("ExtraTrees",       ExtraTreesRegressor(n_estimators=200, random_state=42, n_jobs=-1)),
+        ("RandomForest",     RandomForestRegressor(n_estimators=200, random_state=42, n_jobs=1)),
+        ("ExtraTrees",       ExtraTreesRegressor(n_estimators=200, random_state=42, n_jobs=1)),
         ("GradientBoosting", GradientBoostingRegressor(n_estimators=200, learning_rate=0.1, random_state=42)),
     ]
     if XGB_OK:
@@ -353,9 +352,9 @@ def main():
     for name, est in models:
         pipe = make_pipe(est)
         try:
-            mae_scores  = -cross_val_score(pipe, X, y, cv=kf, scoring="neg_mean_absolute_error", n_jobs=-1)
-            rmse_scores = np.sqrt(-cross_val_score(pipe, X, y, cv=kf, scoring="neg_mean_squared_error", n_jobs=-1))
-            r2_scores   = cross_val_score(pipe, X, y, cv=kf, scoring="r2", n_jobs=-1)
+            mae_scores  = -cross_val_score(pipe, X, y, cv=kf, scoring="neg_mean_absolute_error", n_jobs=1)
+            rmse_scores = np.sqrt(-cross_val_score(pipe, X, y, cv=kf, scoring="neg_mean_squared_error", n_jobs=1))
+            r2_scores   = cross_val_score(pipe, X, y, cv=kf, scoring="r2", n_jobs=1)
 
             cv_results.append({
                 "Model": name,
@@ -414,9 +413,9 @@ def main():
     }
     gb_search = RandomizedSearchCV(
         make_pipe(GradientBoostingRegressor(random_state=42)),
-        gb_params, n_iter=60, cv=10,
+        gb_params, n_iter=2, cv=10,
         scoring="neg_root_mean_squared_error",
-        random_state=42, n_jobs=-1, verbose=1
+        random_state=42, n_jobs=1, verbose=1
     )
     gb_search.fit(X, y)
     print(f"\n✅ Best GB CV RMSE: {-gb_search.best_score_:.4f}")
@@ -436,9 +435,9 @@ def main():
         }
         xgb_search = RandomizedSearchCV(
             make_pipe(xgb.XGBRegressor(random_state=42, verbosity=0)),
-            xgb_params, n_iter=60, cv=10,
+            xgb_params, n_iter=2, cv=10,
             scoring="neg_root_mean_squared_error",
-            random_state=42, n_jobs=-1, verbose=1
+            random_state=42, n_jobs=1, verbose=1
         )
         xgb_search.fit(X, y)
         print(f"✅ Best XGB CV RMSE: {-xgb_search.best_score_:.4f}")
@@ -457,9 +456,9 @@ def main():
         }
         lgb_search = RandomizedSearchCV(
             make_pipe(lgb.LGBMRegressor(random_state=42, verbose=-1)),
-            lgb_params, n_iter=60, cv=10,
+            lgb_params, n_iter=2, cv=10,
             scoring="neg_root_mean_squared_error",
-            random_state=42, n_jobs=-1, verbose=1
+            random_state=42, n_jobs=1, verbose=1
         )
         lgb_search.fit(X, y)
         print(f"✅ Best LGB CV RMSE: {-lgb_search.best_score_:.4f}")
@@ -475,8 +474,8 @@ def main():
     gb_params_inner = {k.replace("m__", ""): v for k, v in gb_search.best_params_.items()}
 
     stack_estimators = [
-        ("rf",    RandomForestRegressor(n_estimators=200, random_state=42, n_jobs=-1)),
-        ("et",    ExtraTreesRegressor(n_estimators=200, random_state=1, n_jobs=-1)),
+        ("rf",    RandomForestRegressor(n_estimators=200, random_state=42, n_jobs=1)),
+        ("et",    ExtraTreesRegressor(n_estimators=200, random_state=1, n_jobs=1)),
         ("gb",    GradientBoostingRegressor(**gb_params_inner, random_state=42)),
         ("ridge", Ridge(alpha=1.0)),
         ("knn",   KNeighborsRegressor(n_neighbors=7)),
@@ -493,15 +492,15 @@ def main():
         ("stack", StackingRegressor(
             estimators=stack_estimators,
             final_estimator=Ridge(alpha=1.0),
-            cv=5, passthrough=False, n_jobs=-1
+            cv=5, passthrough=False, n_jobs=1
         ))
     ])
 
     # 10-Fold CV on Stacking Ensemble
     print("Running 10-Fold CV on Stacking Ensemble...")
-    stack_mae  = -cross_val_score(stack_pipe, X, y, cv=kf, scoring="neg_mean_absolute_error", n_jobs=-1)
-    stack_rmse = np.sqrt(-cross_val_score(stack_pipe, X, y, cv=kf, scoring="neg_mean_squared_error", n_jobs=-1))
-    stack_r2   = cross_val_score(stack_pipe, X, y, cv=kf, scoring="r2", n_jobs=-1)
+    stack_mae  = -cross_val_score(stack_pipe, X, y, cv=kf, scoring="neg_mean_absolute_error", n_jobs=1)
+    stack_rmse = np.sqrt(-cross_val_score(stack_pipe, X, y, cv=kf, scoring="neg_mean_squared_error", n_jobs=1))
+    stack_r2   = cross_val_score(stack_pipe, X, y, cv=kf, scoring="r2", n_jobs=1)
 
     print(f"\n✅ Stacking Ensemble — 10-Fold CV Results:")
     print(f"   MAE:  {stack_mae.mean():.4f} ± {stack_mae.std():.4f}")
@@ -561,13 +560,40 @@ def main():
 
     ax2 = axes[1]
     res = y_test.values - preds
-    ax2.hist(res, bins=30, color="#e74c3c", edgecolor="white", alpha=0.85)
-    ax2.axvline(0, color="black", lw=1.5)
-    ax2.set_xlabel("Residual (Actual − Predicted)")
-    ax2.set_ylabel("Count")
-    ax2.set_title("Residuals Distribution", fontweight="bold")
-    ax2.text(0.02, 0.95, f"Mean: {res.mean():.3f}\nStd: {res.std():.3f}",
-             transform=ax2.transAxes, va="top")
+    pd.DataFrame({'Residuals': res}).to_csv(os.path.join(BASE, "data", "final_residuals.csv"), index=False)
+
+    
+    # Calculate exact Mean and Standard Deviation for markings
+    mean_error = res.mean()
+    std_error = res.std()
+
+    # Plot the smooth Bell Curve (KDE) and the actual data bars
+    sns.histplot(res, bins=30, kde=True, color="#e74c3c", edgecolor="white", alpha=0.85, ax=ax2)
+    max_y = ax2.get_ylim()[1]
+
+    # ---- LAYER 1: The Center Line (Mean) ----
+    ax2.axvline(mean_error, color="black", lw=3)
+    ax2.text(mean_error + 0.04, max_y * 0.95, f"Mean Error:\n {mean_error:.3f}", color="black", fontweight="bold", fontsize=10)
+
+    # ---- LAYER 2: First Standard Deviation (±1 Sigma: 68% of predictions) ----
+    ax2.axvline(mean_error + std_error, color="#2980b9", lw=2, ls="--")
+    ax2.axvline(mean_error - std_error, color="#2980b9", lw=2, ls="--")
+    ax2.text(mean_error + std_error + 0.04, max_y * 0.85, f"+1 Std Dev\n(+{std_error:.3f})", color="#2980b9", fontweight="bold", fontsize=9)
+    ax2.text(mean_error - std_error - 0.28, max_y * 0.85, f"-1 Std Dev\n(-{std_error:.3f})", color="#2980b9", fontweight="bold", fontsize=9)
+
+    # Shade the 68% "Goldilocks Zone"
+    ax2.axvspan(mean_error - std_error, mean_error + std_error, color='#2980b9', alpha=0.15)
+
+    # ---- LAYER 3: Second Standard Deviation (±2 Sigma: 95% of predictions) ----
+    ax2.axvline(mean_error + (2 * std_error), color="#27ae60", lw=2, ls=":")
+    ax2.axvline(mean_error - (2 * std_error), color="#27ae60", lw=2, ls=":")
+    ax2.text(mean_error + (2 * std_error) + 0.04, max_y * 0.70, f"+2 Std Dev\n(+{(2*std_error):.3f})", color="#27ae60", fontweight="bold", fontsize=9)
+    ax2.text(mean_error - (2 * std_error) - 0.28, max_y * 0.70, f"-2 Std Dev\n(-{(2*std_error):.3f})", color="#27ae60", fontweight="bold", fontsize=9)
+
+    ax2.set_xlabel("Prediction Error (Actual − Predicted)")
+    ax2.set_ylabel("Count of Students")
+    ax2.set_title("Residuals Distribution with Real Standard Deviations", fontweight="bold")
+    
     plt.tight_layout()
     plt.savefig(os.path.join(BASE, "data", "final_evaluation.png"), dpi=150)
     plt.close()
